@@ -310,7 +310,7 @@ footer.site-footer {
 @media (max-width: 900px) {
   .hero .wrap { grid-template-columns: 1fr; }
   .bento { grid-template-columns: repeat(2, 1fr); }
-  .bento-card, .bento-card.big { grid-column: span 2; grid-row: span 1; }
+  .bento-card, .bento-card.big, .bento-card.wide { grid-column: span 2; grid-row: span 1; }
   .feature-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 720px) {
@@ -331,7 +331,7 @@ footer.site-footer {
   .hero { padding: 56px 0 40px; }
   .section { padding: 60px 0; }
   .bento { grid-template-columns: 1fr; }
-  .bento-card, .bento-card.big { grid-column: span 1; }
+  .bento-card, .bento-card.big, .bento-card.wide { grid-column: span 1; }
   .feature-grid { grid-template-columns: 1fr; }
   .content-block { margin-bottom: 52px; }
 }
