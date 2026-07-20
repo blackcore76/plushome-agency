@@ -226,6 +226,55 @@ a { color: inherit; text-decoration: none; }
 .bento-card .go svg { width: 14px; height: 14px; transition: transform 0.15s; }
 .bento-card:hover .go svg { transform: translateX(3px); }
 
+/* ---- Content page (text-driven subpages) ---- */
+.content-block { margin-bottom: 72px; }
+.content-block:last-child { margin-bottom: 0; }
+.content-block h3 {
+  font-size: clamp(19px, 2vw, 23px);
+  letter-spacing: -0.3px;
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+.prose { max-width: 640px; }
+.prose p { color: var(--muted); font-size: 16px; line-height: 1.85; margin: 0 0 16px; }
+.prose p:last-child { margin-bottom: 0; }
+
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.compare-table { width: 100%; border-collapse: collapse; min-width: 520px; }
+.compare-table th, .compare-table td {
+  text-align: left;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14.5px;
+}
+.compare-table th {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.compare-table td { color: var(--muted); }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table td.win { color: var(--accent); font-weight: 700; }
+.compare-table td:first-child, .compare-table th:first-child { color: var(--ink); font-weight: 600; }
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.feature-card {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.feature-card .label { color: var(--accent); margin-bottom: 12px; }
+.feature-card h4 { font-size: 16px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.2px; }
+.feature-card p { color: var(--muted); font-size: 13.5px; line-height: 1.6; margin: 0; }
+
 /* ---- Footer ---- */
 footer.site-footer {
   border-top: 1px solid var(--line);
@@ -262,6 +311,7 @@ footer.site-footer {
   .hero .wrap { grid-template-columns: 1fr; }
   .bento { grid-template-columns: repeat(2, 1fr); }
   .bento-card, .bento-card.big { grid-column: span 2; grid-row: span 1; }
+  .feature-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 720px) {
   .nav-links {
@@ -282,6 +332,8 @@ footer.site-footer {
   .section { padding: 60px 0; }
   .bento { grid-template-columns: 1fr; }
   .bento-card, .bento-card.big { grid-column: span 1; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .content-block { margin-bottom: 52px; }
 }
 
 @media (prefers-color-scheme: dark) {

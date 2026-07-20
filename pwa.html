@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>설치되는 웹앱, PWA — PlusHome Agency</title>
+<meta name="description" content="앱스토어 없이 홈 화면에 설치되는 웹앱, PWA가 무엇이고 왜 일반 홈페이지 대신 선택해야 하는지 정리했습니다." />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -27,32 +28,113 @@
 <main>
   <section class="section" style="padding-top:80px">
     <div class="wrap">
-      <span class="label">업무소개</span>
-      <h2 style="font-size:clamp(28px,4vw,44px);letter-spacing:-0.6px;margin:14px 0 16px;">설치되는 웹앱, PWA</h2>
-      <p style="color:var(--muted);font-size:16px;max-width:520px;">
-                        
-        <b>PWA(Progressive Web Apps)란</b> 
 
-        웹 기술(HTML, CSS, JavaScript)로 제작되었지만 
-        스마트폰에 설치해 네이티브 앱처럼 사용할 수 있는 웹 애플리케이션입니다. 
+      <div class="content-block" style="margin-bottom:64px">
+        <span class="label">업무소개</span>
+        <h2 style="font-size:clamp(28px,4vw,44px);letter-spacing:-0.6px;margin:14px 0 16px;">설치되는 웹앱, PWA</h2>
+        <p style="color:var(--muted);font-size:16px;max-width:560px;">PWA(Progressive Web App)는 브라우저로 만들어지지만, 홈 화면에 설치되고 앱처럼 켜지는 웹사이트입니다. 앱스토어 심사 없이, 하나의 코드로 안드로이드·아이폰·PC에서 모두 작동합니다.</p>
+      </div>
 
-        별도의 앱 스토어 설치 과정 없이 웹 링크로 즉시 접속 및 공유가 가능하고 
-        오프라인 작동과 푸시 알림 등 앱 수준의 기능을 지원합니다.
-        
+      <div class="content-block prose">
+        <h3>PWA가 뭔가요?</h3>
+        <p>일반 홈페이지는 브라우저를 열고 주소를 검색해서 들어가야 합니다. PWA는 홈 화면에 아이콘으로 설치되고, 주소창 없이 앱처럼 곧바로 켜집니다. 오프라인 상태에서도 마지막으로 본 화면을 보여주고, 필요하면 푸시 알림도 보낼 수 있습니다.</p>
+        <p>기술적으로는 여전히 웹사이트입니다. 브라우저의 '서비스 워커(Service Worker)'라는 기능으로 파일을 미리 저장해두고, '홈 화면에 설치' 이벤트를 지원하는 것뿐입니다. 그래서 일반 웹사이트를 만드는 비용과 기간으로, 앱에 가까운 경험을 만들 수 있습니다.</p>
+      </div>
 
-        <b>주요 장점 및 핵심 기능</b>
+      <div class="content-block">
+        <h3>일반 홈페이지 · 네이티브 앱과 비교하면</h3>
+        <div class="table-scroll">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>일반 홈페이지</th>
+                <th>네이티브 앱</th>
+                <th>PWA</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>설치</td>
+                <td>불가 (매번 접속)</td>
+                <td>앱스토어에서 설치</td>
+                <td class="win">홈 화면에 설치</td>
+              </tr>
+              <tr>
+                <td>앱스토어 심사</td>
+                <td>필요 없음</td>
+                <td>필요 (수일~수주)</td>
+                <td class="win">필요 없음</td>
+              </tr>
+              <tr>
+                <td>개발 방식</td>
+                <td>웹 1종</td>
+                <td>iOS·Android 각각 개발</td>
+                <td class="win">웹 1종으로 전 플랫폼</td>
+              </tr>
+              <tr>
+                <td>오프라인 사용</td>
+                <td>불가</td>
+                <td>가능</td>
+                <td class="win">가능 (일부 기능)</td>
+              </tr>
+              <tr>
+                <td>푸시 알림</td>
+                <td>불가</td>
+                <td>가능</td>
+                <td class="win">가능</td>
+              </tr>
+              <tr>
+                <td>업데이트</td>
+                <td>즉시 반영</td>
+                <td>스토어 재심사 필요</td>
+                <td class="win">즉시 반영</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-        앱 스토어 우회 - 구글 플레이스토어나 애플 앱스토어의 복잡한 심사 과정 없이 웹사이트를 바로 앱처럼 배포하고 업데이트할 수 있습니다.
+      <div class="content-block">
+        <h3>가능한 기능</h3>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <span class="label">설치</span>
+            <h4>홈 화면 설치</h4>
+            <p>브라우저 없이 아이콘 하나로 바로 실행됩니다.</p>
+          </div>
+          <div class="feature-card">
+            <span class="label">알림</span>
+            <h4>푸시 알림</h4>
+            <p>임대료 미납, 계약 만료 같은 소식을 실시간으로 알려줍니다.</p>
+          </div>
+          <div class="feature-card">
+            <span class="label">오프라인</span>
+            <h4>오프라인 지원</h4>
+            <p>네트워크가 불안정해도 마지막 화면과 일부 기능을 그대로 쓸 수 있습니다.</p>
+          </div>
+          <div class="feature-card">
+            <span class="label">속도</span>
+            <h4>빠른 로딩</h4>
+            <p>파일을 미리 저장해 두 번째 방문부터는 훨씬 빠르게 열립니다.</p>
+          </div>
+        </div>
+      </div>
 
-        오프라인 지원 - 서비스 워커(Service Worker) 기술을 통해 네트워크가 연결되지 않은 상태나 불안정한 환경에서도 캐시된 데이터를 기반으로 앱이 정상 작동합니다.
-        
-        뛰어난 접근성 - 웹 브라우저 주소창을 숨기고 일반 모바일 앱처럼 전체 화면으로 실행할 수 있으며, 홈 화면에 아이콘을 추가할 수 있습니다.
-        
-        강력한 알림 - 네이티브 앱과 동일하게 스마트폰 바탕화면으로 푸시 알림을 발송하여 사용자 재방문율을 높일 수 있습니다.
-        
-        크로스 플랫폼 - 안드로이드, iOS, PC 등 운영체제(OS)나 기기 종류에 상관없이 하나의 코드로 동일한 서비스를 제공할 수 있습니다.
+      <div class="content-block prose">
+        <h3>이론이 아니라, 저희가 먼저 써봤습니다</h3>
+        <p>PWA가 실제로 잘 작동하는지 직접 만들어서 매일 쓰고 있습니다. 임대 관리 실무에 쓰는 <a href="https://plushome.kr" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">PlusHome</a>, 여러 도구를 모은 <a href="https://blackcore76.github.io/home" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">Home</a> 모두 이 방식으로 만들어 운영 중입니다.</p>
+      </div>
 
-      </p>
+      <a class="bento-card wide" href="contact.html" style="display:flex">
+        <div>
+          <span class="label">Next</span>
+          <h3 style="margin:0 0 10px;font-size:clamp(19px,2vw,25px);font-weight:700;letter-spacing:-0.3px">우리 서비스도 PWA로 만들 수 있을까요?</h3>
+          <p style="color:var(--muted);font-size:14.5px;margin:0;max-width:40ch">간단한 요구사항만 남겨주시면, 가장 현실적인 제작 방향을 제안드립니다.</p>
+        </div>
+        <span class="go">상담 요청하기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
     </div>
   </section>
 </main>
