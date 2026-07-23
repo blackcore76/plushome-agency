@@ -170,8 +170,9 @@ a { color: inherit; text-decoration: none; }
 }
 .trust .wrap {
   display: flex;
-  align-items: center;
-  gap: 28px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
   flex-wrap: wrap;
 }
 .trust .label { white-space: nowrap; }
