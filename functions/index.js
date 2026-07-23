@@ -267,3 +267,179 @@ exports.postAnswer = onCall(async (request) => {
   await docRef.update({ answer, status: "answered" });
   return { ok: true };
 });
+
+// ---- Project showcase ----
+const MAX_PROJECT_TITLE = 100;
+const MAX_PROJECT_CAPTION = 200;
+const MAX_PROJECT_IMAGES = 20;
+
+function buildProjectImageUrl(img) {
+  return `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(img.path)}?alt=media&token=${img.token}`;
+}
+
+async function uploadProjectImages(docId, images, startIdx) {
+  const stored = [];
+  for (let i = 0; i < images.length; i++) {
+    const img = images[i];
+    if (!img || typeof img.data !== "string" || !ALLOWED_IMAGE_TYPES.includes(img.contentType)) {
+      throw new HttpsError("invalid-argument", "이미지 형식이 올바르지 않습니다.");
+    }
+    const buffer = Buffer.from(img.data, "base64");
+    if (buffer.length === 0 || buffer.length > MAX_IMAGE_BYTES) {
+      throw new HttpsError("invalid-argument", "이미지 용량은 3MB를 넘을 수 없습니다.");
+    }
+    const ext = img.contentType.split("/")[1];
+    const path = `projects/${docId}/${startIdx + i}.${ext}`;
+    const token = randomUUID();
+    await bucket.file(path).save(buffer, {
+      contentType: img.contentType,
+      resumable: false,
+      metadata: { metadata: { firebaseStorageDownloadTokens: token } },
+    });
+    stored.push({
+      path,
+      token,
+      caption: typeof img.caption === "string" ? img.caption.slice(0, MAX_PROJECT_CAPTION) : "",
+      date: typeof img.date === "string" ? img.date.slice(0, 10) : "",
+    });
+  }
+  return stored;
+}
+
+exports.createProject = onCall(async (request) => {
+  assertAdmin(request);
+  const data = request.data || {};
+
+  const title = assertString(data.title, "제목", MAX_PROJECT_TITLE);
+  const startDate = assertString(data.startDate, "의뢰일", 10);
+  const endDate = typeof data.endDate === "string" ? data.endDate.trim().slice(0, 10) : "";
+  const status = data.status === "완료" ? "완료" : "진행중";
+
+  const images = Array.isArray(data.images) ? data.images : [];
+  if (images.length > MAX_PROJECT_IMAGES) {
+    throw new HttpsError("invalid-argument", `이미지는 최대 ${MAX_PROJECT_IMAGES}장까지 가능합니다.`);
+  }
+
+  const docRef = db.collection("projects").doc();
+  const storedImages = await uploadProjectImages(docRef.id, images, 0);
+
+  await docRef.set({
+    title,
+    startDate,
+    endDate,
+    status,
+    images: storedImages,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return { id: docRef.id };
+});
+
+exports.listProjects = onCall(async (request) => {
+  const data = request.data || {};
+  const pageSize = Math.min(Math.max(Number(data.pageSize) || 10, 1), 50);
+  const page = Math.max(Number(data.page) || 1, 1);
+
+  const query = db.collection("projects")
+    .orderBy("createdAt", "desc")
+    .offset((page - 1) * pageSize)
+    .limit(pageSize);
+
+  const [snap, countSnap] = await Promise.all([
+    query.get(),
+    db.collection("projects").count().get(),
+  ]);
+
+  const items = snap.docs.map((doc) => {
+    const d = doc.data();
+    const thumb = d.images && d.images.length > 0 ? d.images[0] : null;
+    return {
+      id: doc.id,
+      title: d.title,
+      startDate: d.startDate || "",
+      endDate: d.endDate || "",
+      status: d.status || "진행중",
+      thumbnailUrl: thumb ? buildProjectImageUrl(thumb) : "",
+      imageCount: (d.images || []).length,
+    };
+  });
+
+  return { items, total: countSnap.data().count, page, pageSize };
+});
+
+exports.getProject = onCall(async (request) => {
+  const data = request.data || {};
+  const id = typeof data.id === "string" ? data.id : "";
+  if (!id) throw new HttpsError("invalid-argument", "잘못된 요청입니다.");
+
+  const doc = await db.collection("projects").doc(id).get();
+  if (!doc.exists) throw new HttpsError("not-found", "존재하지 않는 프로젝트입니다.");
+
+  const d = doc.data();
+  return {
+    title: d.title,
+    startDate: d.startDate || "",
+    endDate: d.endDate || "",
+    status: d.status || "진행중",
+    images: (d.images || []).map((img) => ({
+      url: buildProjectImageUrl(img),
+      caption: img.caption || "",
+      date: img.date || "",
+    })),
+    isAdmin: !!(request.auth && request.auth.uid === ADMIN_UID),
+  };
+});
+
+exports.updateProject = onCall(async (request) => {
+  assertAdmin(request);
+  const data = request.data || {};
+  const id = typeof data.id === "string" ? data.id : "";
+  if (!id) throw new HttpsError("invalid-argument", "잘못된 요청입니다.");
+
+  const docRef = db.collection("projects").doc(id);
+  const doc = await docRef.get();
+  if (!doc.exists) throw new HttpsError("not-found", "존재하지 않는 프로젝트입니다.");
+
+  const d = doc.data();
+  const updates = {};
+
+  if (typeof data.title === "string") updates.title = data.title.trim().slice(0, MAX_PROJECT_TITLE);
+  if (typeof data.startDate === "string") updates.startDate = data.startDate.trim().slice(0, 10);
+  if (typeof data.endDate === "string") updates.endDate = data.endDate.trim().slice(0, 10);
+  if (typeof data.status === "string") updates.status = data.status === "완료" ? "완료" : "진행중";
+
+  const newImages = Array.isArray(data.newImages) ? data.newImages : [];
+  const existing = d.images || [];
+
+  if (existing.length + newImages.length > MAX_PROJECT_IMAGES) {
+    throw new HttpsError("invalid-argument", `이미지는 최대 ${MAX_PROJECT_IMAGES}장까지 가능합니다.`);
+  }
+
+  if (newImages.length > 0) {
+    const stored = await uploadProjectImages(id, newImages, existing.length);
+    updates.images = [...existing, ...stored];
+  }
+
+  if (Object.keys(updates).length > 0) {
+    await docRef.update(updates);
+  }
+
+  return { ok: true };
+});
+
+exports.deleteProject = onCall(async (request) => {
+  assertAdmin(request);
+  const data = request.data || {};
+  const id = typeof data.id === "string" ? data.id : "";
+  if (!id) throw new HttpsError("invalid-argument", "잘못된 요청입니다.");
+
+  const docRef = db.collection("projects").doc(id);
+  const doc = await docRef.get();
+  if (!doc.exists) throw new HttpsError("not-found", "존재하지 않는 프로젝트입니다.");
+
+  const d = doc.data();
+  await Promise.all((d.images || []).map((img) => bucket.file(img.path).delete({ ignoreNotFound: true })));
+  await docRef.delete();
+
+  return { ok: true };
+});

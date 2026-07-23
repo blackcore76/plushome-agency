@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>제작과정 히스토리 — PlusHome Agency</title>
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=1" />
+<link rel="stylesheet" href="style.css?v=2" />
+<link rel="stylesheet" href="board.css?v=2" />
+<link rel="stylesheet" href="process.css?v=1" />
 </head>
 <body>
 
@@ -31,10 +33,74 @@
     <div class="wrap">
       <span class="label">제작과정</span>
       <h2 style="font-size:clamp(28px,4vw,44px);letter-spacing:-0.6px;margin:14px 0 16px;">제작과정 히스토리</h2>
-      <p style="color:var(--muted);font-size:16px;max-width:520px;">문의부터 오픈까지 실제 진행 과정을 스크린샷으로 정리해서 공개할 예정입니다. (준비 중)</p>
+      <p style="color:var(--muted);font-size:16px;margin-bottom:40px;">실제 프로젝트의 작업 과정을 스크린샷으로 공개합니다.</p>
+
+      <div id="process-root">
+
+        <div id="view-list">
+          <div class="board-toolbar">
+            <span id="list-total" class="board-total"></span>
+            <button type="button" class="btn btn-primary" id="btn-new-project" hidden>프로젝트 등록</button>
+          </div>
+          <div class="project-grid" id="project-grid"></div>
+          <div class="board-pagination" id="pagination"></div>
+        </div>
+
+        <div id="view-detail" hidden>
+          <button type="button" class="btn btn-ghost" id="btn-back">← 목록으로</button>
+          <div id="detail-body" class="detail-body"></div>
+        </div>
+
+        <div id="view-write" hidden>
+          <form id="form-project" class="board-form" novalidate>
+            <div class="field-row">
+              <label>제목 (예: 홍길동님 — ○○사이트) <input type="text" name="title" maxlength="100" required /></label>
+            </div>
+            <div class="field-row two">
+              <label>의뢰일 <input type="date" name="startDate" required /></label>
+              <label>완료일 (선택) <input type="date" name="endDate" /></label>
+            </div>
+            <div class="field-row">
+              <label>상태
+                <select name="status">
+                  <option value="진행중">진행중</option>
+                  <option value="완료">완료</option>
+                </select>
+              </label>
+            </div>
+            <div id="existing-images" class="field-row" hidden>
+              <span class="field-label">기존 스크린샷</span>
+              <div id="existing-preview" class="file-preview"></div>
+            </div>
+            <div class="field-row">
+              <span class="field-label">스크린샷 추가 (최대 20장, 550px 리사이즈)</span>
+              <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp" multiple />
+              <div id="file-preview-list"></div>
+            </div>
+            <div id="form-error" class="form-error" hidden></div>
+            <div class="field-row actions">
+              <button type="button" class="btn btn-ghost" id="btn-cancel">취소</button>
+              <button type="submit" class="btn btn-primary" id="btn-submit">등록</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
     </div>
   </section>
 </main>
+
+<div id="confirm-modal" class="modal-backdrop" hidden>
+  <div class="modal">
+    <p id="confirm-message"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="confirm-cancel">취소</button>
+      <button type="button" class="btn btn-danger" id="confirm-ok">확인</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
 
 <footer class="site-footer">
   <div class="wrap">
@@ -55,5 +121,6 @@
 
 <script src="app.js?v=1"></script>
 <script type="module" src="admin-auth.js?v=1"></script>
+<script type="module" src="process.js?v=1"></script>
 </body>
 </html>
