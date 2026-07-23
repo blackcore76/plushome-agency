@@ -4,10 +4,23 @@
     "ignore": [
       "firebase.json",
       ".firebaserc",
+      "functions/**",
       "**/.*",
       "**/node_modules/**"
     ],
     "cleanUrls": true,
     "trailingSlash": false
-  }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default"
+    }
+  ]
 }

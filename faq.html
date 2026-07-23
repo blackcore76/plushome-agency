@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>자주 묻는 질문 — PlusHome Agency</title>
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <link rel="stylesheet" href="style.css?v=1" />
 </head>
 <body>
@@ -12,13 +13,14 @@
   <div class="wrap">
     <a class="brand" href="index.html#top"><span class="mark"></span>PlusHome Agency</a>
     <nav class="nav-links">
-      <a href="pwa.html">업무소개</a>
+      <a href="pwa.html">PWA란?</a>
       <a href="process.html">제작과정</a>
       <a href="portfolio.html">포트폴리오</a>
       <a href="contact.html">문의</a>
     </nav>
     <div class="nav-right">
-      <a class="nav-cta" href="contact.html">상담 요청</a>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="테마 전환">🌙</button>
+      <button type="button" class="admin-trigger" id="admin-trigger" aria-label="관리자">+</button>
       <button class="nav-toggle" aria-label="메뉴 열기"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -52,5 +54,6 @@
 </footer>
 
 <script src="app.js?v=1"></script>
+<script type="module" src="admin-auth.js?v=1"></script>
 </body>
 </html>

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>설치되는 웹앱, PWA — PlusHome Agency</title>
 <meta name="description" content="앱스토어 없이 홈 화면에 설치되는 웹앱, PWA가 무엇이고 왜 일반 홈페이지 대신 선택해야 하는지 정리했습니다." />
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <link rel="stylesheet" href="style.css?v=1" />
 </head>
 <body>
@@ -13,13 +14,14 @@
   <div class="wrap">
     <a class="brand" href="index.html#top"><span class="mark"></span>PlusHome Agency</a>
     <nav class="nav-links">
-      <a href="pwa.html">업무소개</a>
+      <a href="pwa.html">PWA란?</a>
       <a href="process.html">제작과정</a>
       <a href="portfolio.html">포트폴리오</a>
       <a href="contact.html">문의</a>
     </nav>
     <div class="nav-right">
-      <a class="nav-cta" href="contact.html">상담 요청</a>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="테마 전환">🌙</button>
+      <button type="button" class="admin-trigger" id="admin-trigger" aria-label="관리자">+</button>
       <button class="nav-toggle" aria-label="메뉴 열기"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -30,15 +32,15 @@
     <div class="wrap">
 
       <div class="content-block" style="margin-bottom:64px">
-        <span class="label">업무소개</span>
+        <span class="label">PWA란?</span>
         <h2 style="font-size:clamp(28px,4vw,44px);letter-spacing:-0.6px;margin:14px 0 16px;">설치되는 웹앱, PWA</h2>
-        <p style="color:var(--muted);font-size:16px;max-width:560px;">PWA(Progressive Web App)는 브라우저로 만들어지지만, 홈 화면에 설치되고 앱처럼 켜지는 웹사이트입니다. 앱스토어 심사 없이, 하나의 코드로 안드로이드·아이폰·PC에서 모두 작동합니다.</p>
+        <p style="color:var(--muted);font-size:16px;">PWA(Progressive Web App)는 브라우저로 만들어지지만, 홈 화면에 설치되고 앱처럼 켜지는 웹사이트입니다.<br>앱스토어 심사 없이, 하나의 코드로 안드로이드·아이폰·PC에서 모두 작동합니다.</p>
       </div>
 
       <div class="content-block prose">
         <h3>PWA가 뭔가요?</h3>
-        <p>일반 홈페이지는 브라우저를 열고 주소를 검색해서 들어가야 합니다. PWA는 홈 화면에 아이콘으로 설치되고, 주소창 없이 앱처럼 곧바로 켜집니다. 오프라인 상태에서도 마지막으로 본 화면을 보여주고, 필요하면 푸시 알림도 보낼 수 있습니다.</p>
-        <p>기술적으로는 여전히 웹사이트입니다. 브라우저의 '서비스 워커(Service Worker)'라는 기능으로 파일을 미리 저장해두고, '홈 화면에 설치' 이벤트를 지원하는 것뿐입니다. 그래서 일반 웹사이트를 만드는 비용과 기간으로, 앱에 가까운 경험을 만들 수 있습니다.</p>
+        <p>일반 홈페이지는 브라우저를 열고 주소를 검색해서 들어가야 합니다.<br>PWA는 홈 화면에 아이콘으로 설치되고, 주소창 없이 앱처럼 곧바로 켜집니다.<br>오프라인 상태에서도 마지막으로 본 화면을 보여주고, 필요하면 푸시 알림도 보낼 수 있습니다.</p>
+        <p>기술적으로는 여전히 웹사이트입니다.<br>브라우저의 '서비스 워커(Service Worker)'라는 기능으로 파일을 미리 저장해두고, '홈 화면에 설치' 이벤트를 지원하는 것뿐입니다.<br>그래서 일반 웹사이트를 만드는 비용과 기간으로, 앱에 가까운 경험을 만들 수 있습니다.</p>
       </div>
 
       <div class="content-block">
@@ -157,5 +159,6 @@
 </footer>
 
 <script src="app.js?v=1"></script>
+<script type="module" src="admin-auth.js?v=1"></script>
 </body>
 </html>
