@@ -270,35 +270,96 @@ exports.postAnswer = onCall(async (request) => {
 
 // ---- Project showcase ----
 const MAX_PROJECT_TITLE = 100;
+const MAX_PROJECT_TAGLINE = 80;
+const MAX_PROJECT_DESCRIPTION = 3000;
+const MAX_PROJECT_VERSION = 20;
 const MAX_PROJECT_CAPTION = 200;
 const MAX_PROJECT_IMAGES = 20;
+const MAX_PROJECT_LINKS = 4;
+const MAX_PROJECT_LINK_LABEL = 20;
+const PROJECT_STATUSES = ["운영중", "개발중", "종료"];
+const PROJECT_CATEGORIES = ["개인", "업무"];
+const PROJECT_PLATFORMS = ["PWA", "웹", "Android", "iOS", "macOS", "Windows", "기타"];
 
 function buildProjectImageUrl(img) {
   return `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(img.path)}?alt=media&token=${img.token}`;
+}
+
+// 이전 형식(진행중/완료)으로 저장된 프로젝트도 새 상태값으로 보여준다.
+function normalizeProjectStatus(status) {
+  if (PROJECT_STATUSES.includes(status)) return status;
+  if (status === "완료") return "운영중";
+  return "개발중";
+}
+
+function optionalString(value, maxLen) {
+  return typeof value === "string" ? value.trim().slice(0, maxLen) : "";
+}
+
+function parseProjectLinks(value) {
+  if (!Array.isArray(value)) return [];
+  if (value.length > MAX_PROJECT_LINKS) {
+    throw new HttpsError("invalid-argument", `링크는 최대 ${MAX_PROJECT_LINKS}개까지 가능합니다.`);
+  }
+  const links = [];
+  for (const link of value) {
+    const url = optionalString(link && link.url, MAX_LINK_LEN);
+    if (!url) continue;
+    if (!/^https?:\/\//i.test(url)) {
+      throw new HttpsError("invalid-argument", "링크는 http:// 또는 https:// 로 시작해야 합니다.");
+    }
+    links.push({ label: optionalString(link.label, MAX_PROJECT_LINK_LABEL) || "열기", url });
+  }
+  return links;
+}
+
+function parseProjectFields(data) {
+  return {
+    title: assertString(data.title, "제목", MAX_PROJECT_TITLE),
+    tagline: optionalString(data.tagline, MAX_PROJECT_TAGLINE),
+    description: optionalString(data.description, MAX_PROJECT_DESCRIPTION),
+    category: PROJECT_CATEGORIES.includes(data.category) ? data.category : "개인",
+    platforms: Array.isArray(data.platforms)
+      ? PROJECT_PLATFORMS.filter((p) => data.platforms.includes(p))
+      : [],
+    status: normalizeProjectStatus(data.status),
+    version: optionalString(data.version, MAX_PROJECT_VERSION),
+    startDate: optionalString(data.startDate, 10),
+    updatedDate: optionalString(data.updatedDate, 10),
+    links: parseProjectLinks(data.links),
+  };
+}
+
+function decodeProjectImage(img) {
+  if (!img || typeof img.data !== "string" || !ALLOWED_IMAGE_TYPES.includes(img.contentType)) {
+    throw new HttpsError("invalid-argument", "이미지 형식이 올바르지 않습니다.");
+  }
+  const buffer = Buffer.from(img.data, "base64");
+  if (buffer.length === 0 || buffer.length > MAX_IMAGE_BYTES) {
+    throw new HttpsError("invalid-argument", "이미지 용량은 3MB를 넘을 수 없습니다.");
+  }
+  return buffer;
+}
+
+async function saveProjectFile(path, buffer, contentType) {
+  const token = randomUUID();
+  await bucket.file(path).save(buffer, {
+    contentType,
+    resumable: false,
+    metadata: { metadata: { firebaseStorageDownloadTokens: token } },
+  });
+  return { path, token };
 }
 
 async function uploadProjectImages(docId, images, startIdx) {
   const stored = [];
   for (let i = 0; i < images.length; i++) {
     const img = images[i];
-    if (!img || typeof img.data !== "string" || !ALLOWED_IMAGE_TYPES.includes(img.contentType)) {
-      throw new HttpsError("invalid-argument", "이미지 형식이 올바르지 않습니다.");
-    }
-    const buffer = Buffer.from(img.data, "base64");
-    if (buffer.length === 0 || buffer.length > MAX_IMAGE_BYTES) {
-      throw new HttpsError("invalid-argument", "이미지 용량은 3MB를 넘을 수 없습니다.");
-    }
+    const buffer = decodeProjectImage(img);
     const ext = img.contentType.split("/")[1];
-    const path = `projects/${docId}/${startIdx + i}.${ext}`;
-    const token = randomUUID();
-    await bucket.file(path).save(buffer, {
-      contentType: img.contentType,
-      resumable: false,
-      metadata: { metadata: { firebaseStorageDownloadTokens: token } },
-    });
+    const saved = await saveProjectFile(`projects/${docId}/${startIdx + i}.${ext}`, buffer, img.contentType);
     stored.push({
-      path,
-      token,
+      ...saved,
       caption: typeof img.caption === "string" ? img.caption.slice(0, MAX_PROJECT_CAPTION) : "",
       date: typeof img.date === "string" ? img.date.slice(0, 10) : "",
     });
@@ -306,14 +367,16 @@ async function uploadProjectImages(docId, images, startIdx) {
   return stored;
 }
 
+async function uploadProjectIcon(docId, icon) {
+  const buffer = decodeProjectImage(icon);
+  const ext = icon.contentType.split("/")[1];
+  return saveProjectFile(`projects/${docId}/icon.${ext}`, buffer, icon.contentType);
+}
+
 exports.createProject = onCall(async (request) => {
   assertAdmin(request);
   const data = request.data || {};
-
-  const title = assertString(data.title, "제목", MAX_PROJECT_TITLE);
-  const startDate = assertString(data.startDate, "의뢰일", 10);
-  const endDate = typeof data.endDate === "string" ? data.endDate.trim().slice(0, 10) : "";
-  const status = data.status === "완료" ? "완료" : "진행중";
+  const fields = parseProjectFields(data);
 
   const images = Array.isArray(data.images) ? data.images : [];
   if (images.length > MAX_PROJECT_IMAGES) {
@@ -322,12 +385,11 @@ exports.createProject = onCall(async (request) => {
 
   const docRef = db.collection("projects").doc();
   const storedImages = await uploadProjectImages(docRef.id, images, 0);
+  const icon = data.icon ? await uploadProjectIcon(docRef.id, data.icon) : null;
 
   await docRef.set({
-    title,
-    startDate,
-    endDate,
-    status,
+    ...fields,
+    icon,
     images: storedImages,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   });
@@ -356,9 +418,11 @@ exports.listProjects = onCall(async (request) => {
     return {
       id: doc.id,
       title: d.title,
-      startDate: d.startDate || "",
-      endDate: d.endDate || "",
-      status: d.status || "진행중",
+      tagline: d.tagline || "",
+      category: d.category || "",
+      platforms: d.platforms || [],
+      status: normalizeProjectStatus(d.status),
+      iconUrl: d.icon ? buildProjectImageUrl(d.icon) : "",
       thumbnailUrl: thumb ? buildProjectImageUrl(thumb) : "",
       imageCount: (d.images || []).length,
     };
@@ -378,9 +442,17 @@ exports.getProject = onCall(async (request) => {
   const d = doc.data();
   return {
     title: d.title,
+    tagline: d.tagline || "",
+    description: d.description || "",
+    category: d.category || "",
+    platforms: d.platforms || [],
+    status: normalizeProjectStatus(d.status),
+    version: d.version || "",
     startDate: d.startDate || "",
-    endDate: d.endDate || "",
-    status: d.status || "진행중",
+    // 이전 형식의 완료일(endDate)은 최근 업데이트로 보여준다.
+    updatedDate: d.updatedDate || d.endDate || "",
+    links: d.links || [],
+    iconUrl: d.icon ? buildProjectImageUrl(d.icon) : "",
     images: (d.images || []).map((img) => ({
       url: buildProjectImageUrl(img),
       caption: img.caption || "",
@@ -401,12 +473,9 @@ exports.updateProject = onCall(async (request) => {
   if (!doc.exists) throw new HttpsError("not-found", "존재하지 않는 프로젝트입니다.");
 
   const d = doc.data();
-  const updates = {};
-
-  if (typeof data.title === "string") updates.title = data.title.trim().slice(0, MAX_PROJECT_TITLE);
-  if (typeof data.startDate === "string") updates.startDate = data.startDate.trim().slice(0, 10);
-  if (typeof data.endDate === "string") updates.endDate = data.endDate.trim().slice(0, 10);
-  if (typeof data.status === "string") updates.status = data.status === "완료" ? "완료" : "진행중";
+  const updates = parseProjectFields(data);
+  // 이전 형식의 완료일은 수정 폼에서 최근 업데이트로 옮겨 저장되므로 지운다.
+  if ("endDate" in d) updates.endDate = admin.firestore.FieldValue.delete();
 
   const newImages = Array.isArray(data.newImages) ? data.newImages : [];
   const existing = d.images || [];
@@ -420,9 +489,14 @@ exports.updateProject = onCall(async (request) => {
     updates.images = [...existing, ...stored];
   }
 
-  if (Object.keys(updates).length > 0) {
-    await docRef.update(updates);
+  if (data.icon) {
+    updates.icon = await uploadProjectIcon(id, data.icon);
+    if (d.icon && d.icon.path !== updates.icon.path) {
+      await bucket.file(d.icon.path).delete({ ignoreNotFound: true });
+    }
   }
+
+  await docRef.update(updates);
 
   return { ok: true };
 });
@@ -438,7 +512,8 @@ exports.deleteProject = onCall(async (request) => {
   if (!doc.exists) throw new HttpsError("not-found", "존재하지 않는 프로젝트입니다.");
 
   const d = doc.data();
-  await Promise.all((d.images || []).map((img) => bucket.file(img.path).delete({ ignoreNotFound: true })));
+  const files = [...(d.images || []), ...(d.icon ? [d.icon] : [])];
+  await Promise.all(files.map((f) => bucket.file(f.path).delete({ ignoreNotFound: true })));
   await docRef.delete();
 
   return { ok: true };

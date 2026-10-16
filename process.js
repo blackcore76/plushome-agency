@@ -19,6 +19,9 @@ onAuthStateChanged(auth, (user) => {
 
 const PAGE_SIZE = 10;
 const MAX_IMAGES = 20;
+const MAX_LINKS = 4;
+const PLATFORMS = ["PWA", "웹", "Android", "iOS", "macOS", "Windows", "기타"];
+const STATUS_BADGE = { "운영중": "answered", "개발중": "pending", "종료": "ended" };
 
 const viewList = document.getElementById("view-list");
 const viewDetail = document.getElementById("view-detail");
@@ -35,11 +38,20 @@ const detailBody = document.getElementById("detail-body");
 const toast = document.getElementById("toast");
 const confirmModal = document.getElementById("confirm-modal");
 const confirmMessage = document.getElementById("confirm-message");
+const iconInput = document.getElementById("icon-input");
+const iconPreview = document.getElementById("icon-preview");
+const linkRows = document.getElementById("link-rows");
+const platformChecks = document.getElementById("platform-checks");
+
+platformChecks.innerHTML = PLATFORMS.map((p) =>
+  `<label class="check-chip"><input type="checkbox" name="platforms" value="${p}" /><span>${p}</span></label>`
+).join("");
 
 let currentPage = 1;
 let selectedImages = [];
 let editingProjectId = null;
 let editingProject = null;
+let selectedIcon = null;
 
 let toastTimer = null;
 function showToast(message, duration = 2600) {
@@ -84,11 +96,32 @@ function errorMessage(err, fallback) {
   return (err && err.message) ? err.message : fallback;
 }
 
+function statusBadgeHtml(status) {
+  return `<span class="badge ${STATUS_BADGE[status] || "pending"}">${escapeHtml(status)}</span>`;
+}
+
+function appIconHtml(iconUrl, title, sizeClass = "") {
+  if (iconUrl) return `<div class="app-icon ${sizeClass}"><img src="${escapeHtml(iconUrl)}" alt="" /></div>`;
+  const initial = (title || "?").trim().charAt(0).toUpperCase();
+  return `<div class="app-icon app-icon-fallback ${sizeClass}"><span>${escapeHtml(initial)}</span></div>`;
+}
+
+function chipsHtml(d) {
+  const chips = [];
+  if (d.category) chips.push(d.category);
+  chips.push(...(d.platforms || []));
+  return chips.map((c) => `<span class="chip">${escapeHtml(c)}</span>`).join("");
+}
+
+function safeUrl(url) {
+  return /^https?:\/\//i.test(url || "") ? url : "#";
+}
+
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function compressImage(file, maxW = 550) {
+function compressImage(file, maxW = 550, square = false) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("이미지를 읽을 수 없습니다."));
@@ -96,12 +129,22 @@ function compressImage(file, maxW = 550) {
       const img = new Image();
       img.onerror = () => reject(new Error("이미지를 처리할 수 없습니다."));
       img.onload = () => {
+        const canvas = document.createElement("canvas");
+        if (square) {
+          // 아이콘은 가운데를 정사각형으로 잘라 maxW 크기로 맞춘다.
+          const side = Math.min(img.width, img.height);
+          const size = Math.min(side, maxW);
+          canvas.width = size;
+          canvas.height = size;
+          canvas.getContext("2d").drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
+          resolve(canvas.toDataURL("image/jpeg", 0.9));
+          return;
+        }
         let { width, height } = img;
         if (width > maxW) {
           height = Math.round(height * (maxW / width));
           width = maxW;
         }
-        const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
         canvas.getContext("2d").drawImage(img, 0, 0, width, height);
@@ -147,10 +190,11 @@ async function loadList(page) {
         card.innerHTML = `
           <div class="project-card-thumb${item.thumbnailUrl ? "" : " empty"}">${thumbHtml}</div>
           <div class="project-card-info">
-            <h3>${escapeHtml(item.title)}</h3>
-            <div class="project-card-meta">
-              <span>${escapeHtml(item.startDate)}${item.endDate ? " ~ " + escapeHtml(item.endDate) : " ~"}</span>
-              <span class="badge ${item.status === "완료" ? "answered" : "pending"}">${escapeHtml(item.status)}</span>
+            ${appIconHtml(item.iconUrl, item.title)}
+            <div class="project-card-text">
+              <h3>${escapeHtml(item.title)}</h3>
+              ${item.tagline ? `<p class="project-card-tagline">${escapeHtml(item.tagline)}</p>` : ""}
+              <div class="project-card-meta">${statusBadgeHtml(item.status)}${chipsHtml(item)}</div>
             </div>
           </div>
         `;
@@ -209,17 +253,31 @@ async function openDetail(id) {
 }
 
 function renderDetail(id, d) {
-  const statusBadge = `<span class="badge ${d.status === "완료" ? "answered" : "pending"}">${escapeHtml(d.status)}</span>`;
-
-  const timelineHtml = (d.images || []).length
-    ? `<div class="timeline">${d.images.map((img) => `
-        <div class="timeline-entry">
-          <a href="${escapeHtml(img.url)}" target="_blank" rel="noopener"><img src="${escapeHtml(img.url)}" loading="lazy" /></a>
-          ${img.caption ? `<div class="timeline-caption">${escapeHtml(img.caption)}</div>` : ""}
-          ${img.date ? `<div class="timeline-date">${escapeHtml(img.date)}</div>` : ""}
-        </div>
+  const links = d.links || [];
+  const linksHtml = links.length
+    ? `<div class="app-actions">${links.map((l, i) => `
+        <a class="btn ${i === 0 ? "btn-primary" : "btn-ghost"}" href="${escapeHtml(safeUrl(l.url))}" target="_blank" rel="noopener">${escapeHtml(l.label)}</a>
       `).join("")}</div>`
-    : '<div class="board-empty" style="margin-top:24px">등록된 스크린샷이 없습니다.</div>';
+    : "";
+
+  const facts = [
+    d.version && ["버전", d.version],
+    d.updatedDate && ["최근 업데이트", d.updatedDate],
+    d.startDate && ["시작일", d.startDate],
+    ["스크린샷", `${(d.images || []).length}장`],
+  ].filter(Boolean);
+  const factsHtml = `<dl class="app-facts">${facts.map(([k, v]) => `
+      <div><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd></div>
+    `).join("")}</dl>`;
+
+  const shotsHtml = (d.images || []).length
+    ? `<div class="app-shots">${d.images.map((img) => `
+        <figure class="app-shot">
+          <a href="${escapeHtml(img.url)}" target="_blank" rel="noopener"><img src="${escapeHtml(img.url)}" loading="lazy" alt="" /></a>
+          ${img.caption ? `<figcaption>${escapeHtml(img.caption)}</figcaption>` : ""}
+        </figure>
+      `).join("")}</div>`
+    : '<div class="board-empty">등록된 스크린샷이 없습니다.</div>';
 
   const adminHtml = d.isAdmin
     ? `<div class="detail-admin-actions">
@@ -229,15 +287,21 @@ function renderDetail(id, d) {
     : "";
 
   detailBody.innerHTML = `
-    <div class="detail-head">
-      <h3>${escapeHtml(d.title)}</h3>
-      <div class="detail-meta">
-        <span>의뢰일: ${escapeHtml(d.startDate)}</span>
-        ${d.endDate ? `<span>완료일: ${escapeHtml(d.endDate)}</span>` : ""}
-        ${statusBadge}
+    <div class="app-head">
+      ${appIconHtml(d.iconUrl, d.title, "app-icon-lg")}
+      <div class="app-head-text">
+        <h3>${escapeHtml(d.title)}</h3>
+        ${d.tagline ? `<p class="app-tagline">${escapeHtml(d.tagline)}</p>` : ""}
+        <div class="project-card-meta">${statusBadgeHtml(d.status)}${chipsHtml(d)}</div>
       </div>
     </div>
-    ${timelineHtml}
+    ${linksHtml}
+    ${factsHtml}
+    <section class="app-section">
+      <h4>스크린샷</h4>
+      ${shotsHtml}
+    </section>
+    ${d.description ? `<section class="app-section"><h4>소개</h4><p class="app-description">${escapeHtml(d.description)}</p></section>` : ""}
     ${adminHtml}
   `;
 
@@ -278,11 +342,23 @@ function openWriteForm(existingData) {
   const existingImagesEl = document.getElementById("existing-images");
   const existingPreview = document.getElementById("existing-preview");
 
+  selectedIcon = null;
+  iconInput.value = "";
+  setIconPreview(existingData ? existingData.iconUrl : "");
+  renderLinkRows(existingData ? existingData.links : []);
+
   if (existingData) {
     formProject.title.value = existingData.title;
-    formProject.startDate.value = existingData.startDate;
-    formProject.endDate.value = existingData.endDate || "";
+    formProject.tagline.value = existingData.tagline || "";
+    formProject.description.value = existingData.description || "";
+    formProject.category.value = existingData.category || "개인";
     formProject.status.value = existingData.status;
+    formProject.version.value = existingData.version || "";
+    formProject.startDate.value = existingData.startDate || "";
+    formProject.updatedDate.value = existingData.updatedDate || "";
+    formProject.querySelectorAll('input[name="platforms"]').forEach((cb) => {
+      cb.checked = (existingData.platforms || []).includes(cb.value);
+    });
     btnSubmit.textContent = "수정";
 
     if (existingData.images && existingData.images.length > 0) {
@@ -296,7 +372,7 @@ function openWriteForm(existingData) {
   } else {
     editingProjectId = null;
     editingProject = null;
-    formProject.startDate.value = todayStr();
+    formProject.updatedDate.value = todayStr();
     btnSubmit.textContent = "등록";
     existingImagesEl.hidden = true;
     existingPreview.innerHTML = "";
@@ -304,6 +380,48 @@ function openWriteForm(existingData) {
 
   showView("write");
 }
+
+function setIconPreview(url) {
+  iconPreview.innerHTML = url ? `<img src="${escapeHtml(url)}" alt="" />` : "<span>+</span>";
+}
+
+function renderLinkRows(links) {
+  linkRows.innerHTML = "";
+  for (let i = 0; i < MAX_LINKS; i++) {
+    const link = (links || [])[i] || { label: "", url: "" };
+    const row = document.createElement("div");
+    row.className = "link-row";
+    row.innerHTML = `
+      <input type="text" class="link-label" list="link-label-options" maxlength="20" placeholder="버튼 이름" />
+      <input type="url" class="link-url" maxlength="300" placeholder="https://" />
+    `;
+    row.querySelector(".link-label").value = link.label;
+    row.querySelector(".link-url").value = link.url;
+    linkRows.appendChild(row);
+  }
+}
+
+function collectLinks() {
+  return Array.from(linkRows.querySelectorAll(".link-row"))
+    .map((row) => ({
+      label: row.querySelector(".link-label").value.trim(),
+      url: row.querySelector(".link-url").value.trim(),
+    }))
+    .filter((l) => l.url);
+}
+
+iconInput.addEventListener("change", async () => {
+  const file = iconInput.files && iconInput.files[0];
+  if (!file) return;
+  try {
+    const dataUrl = await compressImage(file, 256, true);
+    selectedIcon = { data: dataUrl.split(",")[1], contentType: "image/jpeg" };
+    setIconPreview(dataUrl);
+  } catch (err) {
+    formError.textContent = errorMessage(err, "아이콘 처리 중 오류가 발생했습니다.");
+    formError.hidden = false;
+  }
+});
 
 fileInput.addEventListener("change", async () => {
   const files = Array.from(fileInput.files || []);
@@ -359,18 +477,26 @@ formProject.addEventListener("submit", async (e) => {
   e.preventDefault();
   formError.hidden = true;
 
-  const title = formProject.title.value.trim();
-  const startDate = formProject.startDate.value;
-  const endDate = formProject.endDate.value;
-  const status = formProject.status.value;
+  const fields = {
+    title: formProject.title.value.trim(),
+    tagline: formProject.tagline.value.trim(),
+    description: formProject.description.value.trim(),
+    category: formProject.category.value,
+    status: formProject.status.value,
+    platforms: Array.from(formProject.querySelectorAll('input[name="platforms"]:checked')).map((cb) => cb.value),
+    version: formProject.version.value.trim(),
+    startDate: formProject.startDate.value,
+    updatedDate: formProject.updatedDate.value,
+    links: collectLinks(),
+  };
 
-  if (!title) {
-    formError.textContent = "제목을 입력해주세요.";
+  if (!fields.title) {
+    formError.textContent = "이름을 입력해주세요.";
     formError.hidden = false;
     return;
   }
-  if (!startDate) {
-    formError.textContent = "의뢰일을 입력해주세요.";
+  if (fields.links.some((l) => !/^https?:\/\//i.test(l.url))) {
+    formError.textContent = "링크는 http:// 또는 https:// 로 시작해야 합니다.";
     formError.hidden = false;
     return;
   }
@@ -390,10 +516,8 @@ formProject.addEventListener("submit", async (e) => {
     if (editingProjectId) {
       await callUpdateProject({
         id: editingProjectId,
-        title,
-        startDate,
-        endDate,
-        status,
+        ...fields,
+        icon: selectedIcon,
         newImages: imagePayload,
       });
       showView("list");
@@ -401,10 +525,8 @@ formProject.addEventListener("submit", async (e) => {
       showToast("수정되었습니다.");
     } else {
       await callCreateProject({
-        title,
-        startDate,
-        endDate,
-        status,
+        ...fields,
+        icon: selectedIcon,
         images: imagePayload,
       });
       showView("list");

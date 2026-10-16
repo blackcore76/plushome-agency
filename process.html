@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>제작과정 히스토리 — PlusHome Agency</title>
+<title>프로젝트 — PlusHome Agency</title>
+<meta name="description" content="PlusHome Agency가 직접 만들고 운영하는 앱·웹·유틸리티 모음입니다." />
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=2" />
+<link rel="stylesheet" href="style.css?v=3" />
 <link rel="stylesheet" href="board.css?v=2" />
-<link rel="stylesheet" href="process.css?v=1" />
+<link rel="stylesheet" href="process.css?v=2" />
 </head>
 <body>
 
@@ -15,9 +16,8 @@
   <div class="wrap">
     <a class="brand" href="index.html#top"><span class="mark"></span>PlusHome Agency</a>
     <nav class="nav-links">
-      <a href="pwa.html">PWA란?</a>
-      <a href="process.html">제작과정</a>
-      <a href="portfolio.html">포트폴리오</a>
+      <a href="pwa.html">만드는 것</a>
+      <a href="process.html">프로젝트</a>
       <a href="contact.html">문의</a>
     </nav>
     <div class="nav-right">
@@ -31,9 +31,9 @@
 <main>
   <section class="section" style="padding-top:80px">
     <div class="wrap">
-      <span class="label">제작과정</span>
-      <h2 style="font-size:clamp(28px,4vw,44px);letter-spacing:-0.6px;margin:14px 0 16px;">제작과정 히스토리</h2>
-      <p style="color:var(--muted);font-size:16px;margin-bottom:40px;">실제 프로젝트의 작업 과정을 스크린샷으로 공개합니다.</p>
+      <span class="label">Projects</span>
+      <h2 style="font-size:clamp(28px,4vw,44px);letter-spacing:-0.6px;margin:14px 0 16px;">프로젝트</h2>
+      <p style="color:var(--muted);font-size:16px;margin-bottom:40px;">개인적으로, 또 업무용으로 직접 만들어 쓰고 있는 앱·웹·유틸리티를 모았습니다.</p>
 
       <div id="process-root">
 
@@ -53,20 +53,59 @@
 
         <div id="view-write" hidden>
           <form id="form-project" class="board-form" novalidate>
+            <div class="field-row icon-row">
+              <div class="icon-picker">
+                <div id="icon-preview" class="app-icon app-icon-lg"><span>+</span></div>
+                <div>
+                  <span class="field-label">앱 아이콘 (선택, 정사각형 권장)</span>
+                  <input type="file" id="icon-input" accept="image/png,image/jpeg,image/webp" />
+                </div>
+              </div>
+            </div>
             <div class="field-row">
-              <label>제목 (예: 홍길동님 — ○○사이트) <input type="text" name="title" maxlength="100" required /></label>
+              <label>이름 <input type="text" name="title" maxlength="100" placeholder="예: PlusHome" required /></label>
+            </div>
+            <div class="field-row">
+              <label>한 줄 소개 (선택) <input type="text" name="tagline" maxlength="80" placeholder="예: 임대관리 PWA" /></label>
             </div>
             <div class="field-row two">
-              <label>의뢰일 <input type="date" name="startDate" required /></label>
-              <label>완료일 (선택) <input type="date" name="endDate" /></label>
-            </div>
-            <div class="field-row">
-              <label>상태
-                <select name="status">
-                  <option value="진행중">진행중</option>
-                  <option value="완료">완료</option>
+              <label>구분
+                <select name="category">
+                  <option value="개인">개인</option>
+                  <option value="업무">업무</option>
                 </select>
               </label>
+              <label>상태
+                <select name="status">
+                  <option value="운영중">운영중</option>
+                  <option value="개발중">개발중</option>
+                  <option value="종료">종료</option>
+                </select>
+              </label>
+            </div>
+            <div class="field-row">
+              <span class="field-label">플랫폼</span>
+              <div class="platform-checks" id="platform-checks"></div>
+            </div>
+            <div class="field-row">
+              <label>설명 (선택) <textarea name="description" rows="8" maxlength="3000" placeholder="어떤 앱인지, 주요 기능, 만든 이유 등"></textarea></label>
+            </div>
+            <div class="field-row">
+              <span class="field-label">다운로드 / 링크 (최대 4개, 첫 번째가 대표 버튼)</span>
+              <div id="link-rows" class="link-rows"></div>
+              <datalist id="link-label-options">
+                <option value="웹에서 열기"></option>
+                <option value="설치하기"></option>
+                <option value="다운로드"></option>
+                <option value="Play 스토어"></option>
+                <option value="App Store"></option>
+                <option value="GitHub"></option>
+              </datalist>
+            </div>
+            <div class="field-row three">
+              <label>버전 (선택) <input type="text" name="version" maxlength="20" placeholder="예: 1.2.0" /></label>
+              <label>시작일 (선택) <input type="date" name="startDate" /></label>
+              <label>최근 업데이트 (선택) <input type="date" name="updatedDate" /></label>
             </div>
             <div id="existing-images" class="field-row" hidden>
               <span class="field-label">기존 스크린샷</span>
@@ -107,8 +146,7 @@
     <div class="footer-top">
       <a class="brand" href="index.html#top"><span class="mark"></span>PlusHome Agency</a>
       <div class="footer-links">
-        <a href="company.html">회사소개</a>
-        <a href="pricing.html">요금/견적안내</a>
+        <a href="company.html">소개</a>
         <a href="faq.html">FAQ</a>
         <a href="privacy.html">개인정보처리방침</a>
       </div>
@@ -122,6 +160,6 @@
 
 <script src="app.js?v=1"></script>
 <script type="module" src="admin-auth.js?v=1"></script>
-<script type="module" src="process.js?v=1"></script>
+<script type="module" src="process.js?v=2"></script>
 </body>
 </html>

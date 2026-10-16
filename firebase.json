@@ -9,7 +9,11 @@
       "**/node_modules/**"
     ],
     "cleanUrls": true,
-    "trailingSlash": false
+    "trailingSlash": false,
+    "redirects": [
+      { "source": "/portfolio{,.html}", "destination": "/process", "type": 301 },
+      { "source": "/pricing{,.html}", "destination": "/", "type": 301 }
+    ]
   },
   "firestore": {
     "rules": "firestore.rules"

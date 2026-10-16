@@ -28,61 +28,167 @@
   color: var(--faint);
   font-size: 13px;
 }
-.project-card-info { padding: 16px 20px; }
+.project-card-info {
+  padding: 16px 20px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.project-card-text { min-width: 0; flex: 1; }
 .project-card-info h3 {
   font-size: 15px;
   font-weight: 700;
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   letter-spacing: -0.2px;
   color: var(--ink);
+}
+.project-card-tagline {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin: 0 0 8px;
 }
 .project-card-meta {
   font-size: 13px;
   color: var(--faint);
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
   flex-wrap: wrap;
 }
-
-.timeline {
-  margin-top: 32px;
-  padding-left: 24px;
-  border-left: 2px solid var(--line);
-}
-.timeline-entry {
-  margin-bottom: 36px;
-  position: relative;
-}
-.timeline-entry:last-child { margin-bottom: 0; }
-.timeline-entry::before {
-  content: '';
-  position: absolute;
-  left: -29px;
-  top: 8px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
-}
-.timeline-entry img {
-  max-width: 100%;
-  border-radius: 10px;
+.chip {
+  font-size: 12px;
+  color: var(--muted);
   border: 1px solid var(--line);
-  display: block;
+  border-radius: 999px;
+  padding: 2px 9px;
 }
-.timeline-caption {
-  margin-top: 10px;
+.badge.ended { background: var(--line); color: var(--muted); }
+
+/* ---- 앱 아이콘 ---- */
+.app-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.app-icon img { width: 100%; height: 100%; object-fit: cover; }
+.app-icon-fallback { background: var(--accent); border-color: var(--accent); }
+.app-icon-fallback span { color: var(--bg); font-weight: 700; font-size: 20px; }
+.app-icon-lg { width: 88px; height: 88px; border-radius: 20px; }
+.app-icon-lg.app-icon-fallback span { font-size: 36px; }
+
+/* ---- 상세 (스토어 등록정보 형태) ---- */
+.app-head {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-top: 24px;
+}
+.app-head-text { min-width: 0; }
+.app-head h3 {
+  font-size: clamp(22px, 3vw, 30px);
+  letter-spacing: -0.4px;
+  margin: 0 0 4px;
+}
+.app-tagline { color: var(--muted); font-size: 15px; margin: 0 0 10px; }
+
+.app-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+.app-actions .btn {
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-line);
+  text-decoration: none;
+}
+.app-actions .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.app-actions .btn-primary:hover { opacity: 0.9; }
+.app-actions .btn-ghost:hover { border-color: var(--accent); }
+
+.app-facts {
+  display: flex;
+  margin: 28px 0 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+.app-facts div {
+  flex: 1;
+  min-width: 96px;
+  text-align: center;
+  padding: 0 12px;
+}
+.app-facts div + div { border-left: 1px solid var(--line); }
+.app-facts dt, .app-facts dd { white-space: nowrap; }
+.app-facts dt { font-size: 12px; color: var(--faint); margin-bottom: 4px; }
+.app-facts dd { margin: 0; font-size: 14px; font-weight: 600; color: var(--ink); font-family: var(--mono); }
+
+.app-section { margin-top: 36px; }
+.app-section h4 { font-size: 17px; margin: 0 0 14px; letter-spacing: -0.2px; }
+
+.app-shots {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+}
+.app-shot { margin: 0; flex: 0 0 auto; scroll-snap-align: start; max-width: 260px; }
+.app-shot img {
+  height: 360px;
+  width: auto;
+  max-width: 260px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.app-shot figcaption { margin-top: 8px; font-size: 13px; color: var(--muted); }
+
+.app-description {
+  white-space: pre-line;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ---- 등록 폼 ---- */
+.icon-picker { display: flex; gap: 16px; align-items: center; }
+#icon-preview span { color: var(--faint); font-size: 28px; }
+.platform-checks { display: flex; gap: 8px; flex-wrap: wrap; }
+.check-chip { cursor: pointer; position: relative; }
+.check-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.check-chip span {
+  display: inline-block;
+  font-size: 13.5px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.check-chip input:checked + span { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.check-chip input:focus-visible + span { outline: 2px solid var(--accent-line); }
+.board-form input[type="date"] {
+  font-family: var(--sans);
   font-size: 14.5px;
   color: var(--ink);
-  font-weight: 600;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  outline: none;
+  color-scheme: light dark;
 }
-.timeline-date {
-  margin-top: 4px;
-  font-size: 12.5px;
-  color: var(--faint);
-  font-family: var(--mono);
-}
+.link-row input[type="url"] { margin-top: 0; }
+.link-rows { display: flex; flex-direction: column; gap: 8px; }
+.link-row { display: grid; grid-template-columns: 160px 1fr; gap: 8px; }
+.field-row.three { flex-direction: row; gap: 16px; }
+.field-row.three label { flex: 1; }
 
 .detail-admin-actions {
   display: flex;
@@ -145,6 +251,14 @@
 
 @media (max-width: 640px) {
   .project-grid { grid-template-columns: 1fr; }
+  .app-head { gap: 14px; }
+  .app-icon-lg { width: 64px; height: 64px; border-radius: 16px; }
+  .app-shot img { height: 280px; max-width: 200px; }
+  .link-row { grid-template-columns: 1fr; }
+  .app-facts { display: grid; grid-template-columns: repeat(2, 1fr); row-gap: 14px; }
+  .app-facts div + div { border-left: none; }
+  .app-facts div:nth-child(even) { border-left: 1px solid var(--line); }
+  .field-row.three { flex-direction: column; }
   .upload-entry { flex-direction: column; }
   .upload-entry img { width: 100%; height: auto; aspect-ratio: 16/10; }
 }
