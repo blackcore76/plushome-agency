@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>프로젝트 — PlusHome Agency</title>
+<title>다운로드 — PlusHome Agency</title>
 <meta name="description" content="PlusHome Agency가 직접 만들고 운영하는 앱·웹·유틸리티 모음입니다." />
 <script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
-<link rel="stylesheet" href="style.css?v=3" />
+<link rel="stylesheet" href="style.css?v=4" />
 <link rel="stylesheet" href="board.css?v=2" />
 <link rel="stylesheet" href="process.css?v=2" />
 </head>
@@ -14,10 +14,10 @@
 
 <header class="site-header">
   <div class="wrap">
-    <a class="brand" href="index.html#top"><span class="mark"></span>PlusHome Agency</a>
+    <a class="brand" href="/"><span class="mark"></span>PlusHome Agency</a>
     <nav class="nav-links">
-      <a href="pwa.html">만드는 것</a>
-      <a href="process.html">프로젝트</a>
+      <a href="about.html">소개</a>
+      <a href="apps.html" aria-current="page">다운로드</a>
       <a href="contact.html">문의</a>
     </nav>
     <div class="nav-right">
@@ -31,16 +31,16 @@
 <main>
   <section class="section" style="padding-top:80px">
     <div class="wrap">
-      <span class="label">Projects</span>
-      <h2 style="font-size:clamp(28px,4vw,44px);letter-spacing:-0.6px;margin:14px 0 16px;">프로젝트</h2>
-      <p style="color:var(--muted);font-size:16px;margin-bottom:40px;">개인적으로, 또 업무용으로 직접 만들어 쓰고 있는 앱·웹·유틸리티를 모았습니다.</p>
+      <span class="label">Apps</span>
+      <h2 style="font-size:clamp(28px,4vw,44px);letter-spacing:-0.6px;margin:14px 0 16px;">다운로드</h2>
+      <p style="color:var(--muted);font-size:16px;margin-bottom:40px;">직접 만들어 운영 중인 앱을 모았습니다. 바로 열어 보거나 설치해서 쓸 수 있습니다.</p>
 
       <div id="process-root">
 
         <div id="view-list">
           <div class="board-toolbar">
             <span id="list-total" class="board-total"></span>
-            <button type="button" class="btn btn-primary" id="btn-new-project" hidden>프로젝트 등록</button>
+            <button type="button" class="btn btn-primary" id="btn-new-project" hidden>앱 등록</button>
           </div>
           <div class="project-grid" id="project-grid"></div>
           <div class="board-pagination" id="pagination"></div>
@@ -143,16 +143,34 @@
 
 <footer class="site-footer">
   <div class="wrap">
-    <div class="footer-top">
-      <a class="brand" href="index.html#top"><span class="mark"></span>PlusHome Agency</a>
-      <div class="footer-links">
-        <a href="company.html">소개</a>
-        <a href="faq.html">FAQ</a>
-        <a href="privacy.html">개인정보처리방침</a>
+    <div class="footer-grid">
+      <div class="footer-about">
+        <a class="brand" href="/"><span class="mark"></span>PlusHome Agency</a>
+        <p>일상과 업무에 필요한 앱을 직접 만들고 운영하는 앱 모음 사이트입니다. 각 앱은 plushome.co.kr의 하위 주소에서 하나씩 서비스할 예정입니다.</p>
+      </div>
+      <div class="footer-col">
+        <h4>둘러보기</h4>
+        <a href="about.html">소개</a>
+        <a href="apps.html">다운로드</a>
+        <a href="contact.html">문의</a>
+      </div>
+      <div class="footer-col">
+        <h4>지원</h4>
+        <a href="faq.html">자주 묻는 질문</a>
+        <a href="contact.html">문의게시판</a>
+      </div>
+      <div class="footer-col">
+        <h4>정책</h4>
+        <a href="privacy.html"><strong>개인정보처리방침</strong></a>
       </div>
     </div>
+    <div class="footer-info">
+      <span>운영 PlusHome Agency</span>
+      <span>운영 형태 비상업 개인 운영</span>
+      <span>문의 사이트 내 문의게시판</span>
+    </div>
     <div class="footer-bottom">
-      <span>&copy; 2026 PlusHome Agency</span>
+      <span>&copy; 2026 PlusHome Agency. All rights reserved.</span>
       <span>plushome.co.kr</span>
     </div>
   </div>

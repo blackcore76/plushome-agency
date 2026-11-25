@@ -11,7 +11,10 @@
     "cleanUrls": true,
     "trailingSlash": false,
     "redirects": [
-      { "source": "/portfolio{,.html}", "destination": "/process", "type": 301 },
+      { "source": "/pwa{,.html}", "destination": "/about", "type": 301 },
+      { "source": "/company{,.html}", "destination": "/about", "type": 301 },
+      { "source": "/process{,.html}", "destination": "/apps", "type": 301 },
+      { "source": "/portfolio{,.html}", "destination": "/apps", "type": 301 },
       { "source": "/pricing{,.html}", "destination": "/", "type": 301 }
     ]
   },
